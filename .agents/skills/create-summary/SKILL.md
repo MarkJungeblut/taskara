@@ -26,6 +26,7 @@ Use this skill to create a new task summary file for a completed non-trivial tas
    - `## Files Touched`
    - `## Decisions`
    - `## Follow-Ups`
+7. Stage and commit the new summary file with a concise commit message unless the user explicitly asks you not to commit.
 
 ## Writing Rules
 
@@ -37,9 +38,10 @@ Use this skill to create a new task summary file for a completed non-trivial tas
 - Include only unresolved next steps or intentionally deferred work in `Follow-Ups`.
 - Do not save a transcript, retrospective, or long narrative.
 - Do not update an older summary unless the user explicitly asks for an update instead of a new summary.
+- Skip this skill for trivial housekeeping unless the user explicitly asks to document it.
 
 ## Repository Conventions
 
 - Summaries in this repository are committed docs, not private notes.
 - Store all task summaries in `docs/task-summaries/`.
-- Use `docs/task-summaries/2026-03-26-task-summary-convention.md` as a concrete example of the expected style and level of detail.
+- Use `docs/task-summaries/2026-03-27-baseline-repo-setup.md` as a concrete example of the expected style and level of detail.
