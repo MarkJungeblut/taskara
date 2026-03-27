@@ -1,0 +1,7 @@
+interface:
+  display_name: "Create Summary"
+  short_description: "Create a short committed task summary."
+  default_prompt: "Use $create-summary to create a new committed task summary for the completed task in this repository."
+
+policy:
+  allow_implicit_invocation: false

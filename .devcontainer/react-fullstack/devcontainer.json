@@ -1,0 +1,27 @@
+{
+  "name": "ai-foundation-react-fullstack",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
+  "postCreateCommand": "/bin/bash .devcontainer/scripts/post-create.sh",
+  "forwardPorts": [
+    1455
+  ],
+  "portsAttributes": {
+    "1455": {
+      "label": "Codex auth callback"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss"
+      ]
+    }
+  }
+}

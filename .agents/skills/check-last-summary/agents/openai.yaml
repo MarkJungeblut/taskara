@@ -1,0 +1,7 @@
+interface:
+  display_name: "Check Last Summary"
+  short_description: "Resume from the latest committed summary."
+  default_prompt: "Use $check-last-summary to load the latest committed task summary for this repository before we continue."
+
+policy:
+  allow_implicit_invocation: false
