@@ -1,0 +1,12 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      VAULT_PATH: /vault
+      WATCH_USE_POLLING: "true"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${TASKARA_VAULT_PATH:-./example-vault}:/vault

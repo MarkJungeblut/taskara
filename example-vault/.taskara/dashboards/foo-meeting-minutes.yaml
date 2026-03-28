@@ -1,0 +1,17 @@
+version: 1
+name: Foo Meeting Minutes
+filters:
+  - field: type
+    operator: equals
+    value: meeting-minute
+  - field: project
+    operator: equals
+    value: foo
+columns:
+  - title
+  - project
+  - start-date
+  - path
+sort:
+  field: start-date
+  direction: desc

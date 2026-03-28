@@ -1,48 +1,103 @@
 # Taskara
 
-## Quick Start
+Taskara is a local-first dashboard app for Markdown vaults with YAML frontmatter. It scans one Obsidian vault, discovers frontmatter fields dynamically, lets you filter notes in a browser UI, and saves dashboards as shareable YAML files inside the vault.
 
-1. Open this repository in one of the devcontainers listed below.
-2. Wait for container startup to finish.
-3. From the repository root, run:
+## What v1 Does
+
+- Reads `*.md` files from one vault
+- Parses frontmatter at the top of each note between `---` markers
+- Supports generic frontmatter keys with these value types:
+  - strings
+  - numbers
+  - booleans
+  - dates in `YYYY-MM-DD`
+  - lists of strings
+- Builds saved dashboards with:
+  - `AND` filters
+  - visible columns
+  - optional sorting
+- Writes dashboard YAML files to `.taskara/dashboards/`
+- Watches the vault for changes and also offers a manual rescan button
+
+## Local Development
+
+1. Install dependencies:
 
 ```bash
-codex
+npm install
 ```
 
-4. If Codex prompts for sign-in, complete the browser-based flow and return to the terminal when authentication finishes.
-
-Useful verification commands inside the container:
+2. Start the app against the included sample vault:
 
 ```bash
-codex --version
-node --version  # React fullstack container
+npm run dev
 ```
 
-## Best Practices
+3. Open [http://localhost:3000](http://localhost:3000)
 
-- Start a new Codex thread for each distinct task to keep context focused and token use efficient.
-- Begin with a clear goal, relevant file paths, and any important constraints or preferences.
-- Use planning before implementation for non-trivial, cross-cutting, or higher-risk changes.
-- Keep requests bounded so verification and handoff stay easy to understand.
-- Ask Codex to run the smallest relevant verification for the change.
+By default the app reads from `./example-vault`. To point it at a real vault:
 
-## Choose Your Setup
+```bash
+VAULT_PATH=/absolute/path/to/your/vault npm run dev
+```
 
-| Use this when | Devcontainer | Includes |
-| --- | --- | --- |
-| You are working on a Next.js and TypeScript fullstack app | [`.devcontainer/react-fullstack/devcontainer.json`](.devcontainer/react-fullstack/devcontainer.json) | Node.js 22 and common React editor extensions for ESLint, Prettier, and Tailwind CSS |
+## Docker Compose
 
-You can open the repository in any editor that supports Dev Containers, including VS Code, Cursor, and GitHub Codespaces.
+Run the app in Docker with the sample vault:
 
-Repo-owned Codex customization:
+```bash
+docker compose up --build
+```
 
-- [`.codex/agents/`](.codex/agents/) contains repo-owned subagent definitions that are committed and shared.
-- Keep repo-specific Codex behavior in version-controlled config so contributors get the same baseline setup.
+To use a real Obsidian vault instead, set `TASKARA_VAULT_PATH` before starting Compose:
 
-## References
+```bash
+TASKARA_VAULT_PATH=/absolute/path/to/your/vault docker compose up --build
+```
 
-- [Codex CLI docs](https://developers.openai.com/codex/cli)
-- [OpenAI Codex repository](https://github.com/openai/codex)
-- [OpenAPI Skill repository](https://github.com/openai/skills)
-- [Awesome Codex Subagents](https://github.com/VoltAgent/awesome-codex-subagents)
+The container mounts the vault at `/vault`. The app treats note files as read-only in code and only writes dashboard files under `.taskara/dashboards/`.
+
+## Dashboard File Format
+
+Dashboard files live in `.taskara/dashboards/*.yaml`.
+
+Example:
+
+```yaml
+version: 1
+name: Foo Meeting Minutes
+filters:
+  - field: type
+    operator: equals
+    value: meeting-minute
+  - field: project
+    operator: equals
+    value: foo
+  - field: start-date
+    operator: greater_than_or_equal
+    value: 2026-01-01
+columns:
+  - title
+  - project
+  - start-date
+  - path
+sort:
+  field: start-date
+  direction: desc
+```
+
+## Scripts
+
+- `npm run dev` starts the local Next.js server
+- `npm run build` builds the production app
+- `npm run start` runs the production build
+- `npm test` runs the TypeScript test suite
+
+## Example Vault
+
+`example-vault/` includes:
+
+- sample meeting and project notes
+- a saved dashboard under `.taskara/dashboards/`
+
+It is meant to make the app runnable immediately after setup.
