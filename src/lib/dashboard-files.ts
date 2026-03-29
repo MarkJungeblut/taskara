@@ -11,6 +11,22 @@ import type {
   DashboardSort
 } from "@/lib/types";
 
+export class DashboardSlugConflictError extends Error {
+  readonly slug: string;
+  readonly existingName: string;
+  readonly requestedName: string;
+
+  constructor(slug: string, existingName: string, requestedName: string) {
+    super(
+      `A dashboard with slug "${slug}" already exists as "${existingName}". Choose a different name, or edit the existing dashboard.`
+    );
+    this.name = "DashboardSlugConflictError";
+    this.slug = slug;
+    this.existingName = existingName;
+    this.requestedName = requestedName;
+  }
+}
+
 function slugifyName(name: string): string {
   return name
     .trim()
@@ -166,9 +182,20 @@ export async function getDashboardFile(slug: string): Promise<DashboardFile | nu
   }
 }
 
-export async function saveDashboardFile(payload: DashboardPayload): Promise<DashboardFile> {
+export async function saveDashboardFile(
+  payload: DashboardPayload,
+  options?: { replace?: boolean }
+): Promise<DashboardFile> {
   const directoryPath = await ensureDashboardDirectory();
   const slug = payload.slug ? slugifyName(payload.slug) : slugifyName(payload.name);
+
+  if (!options?.replace) {
+    const existing = await getDashboardFile(slug);
+    if (existing && existing.name.trim() !== payload.name.trim()) {
+      throw new DashboardSlugConflictError(slug, existing.name, payload.name.trim());
+    }
+  }
+
   const filePath = path.join(directoryPath, `${slug}.yaml`);
 
   const normalized: DashboardDefinition = {

@@ -5,6 +5,7 @@ import os from "node:os";
 import path from "node:path";
 
 import {
+  DashboardSlugConflictError,
   getDashboardFile,
   listDashboardFiles,
   saveDashboardFile
@@ -34,4 +35,62 @@ test("dashboard files can be saved and listed", async () => {
 
   const loaded = await getDashboardFile("foo-meeting-minutes");
   assert.equal(loaded?.filters[0]?.field, "project");
+});
+
+const minimalPayload = {
+  version: 1 as const,
+  name: "",
+  filters: [] as const,
+  columns: ["title", "path"] as const
+};
+
+test("saveDashboardFile rejects slug collision when names differ and replace is false", async () => {
+  const vaultPath = await createTempVault();
+  process.env.VAULT_PATH = vaultPath;
+
+  await saveDashboardFile({ ...minimalPayload, name: "Foo Bar" });
+
+  await assert.rejects(
+    saveDashboardFile({ ...minimalPayload, name: "Foo-Bar" }),
+    (error: unknown) => {
+      assert.ok(error instanceof DashboardSlugConflictError);
+      const conflict = error as DashboardSlugConflictError;
+      assert.equal(conflict.slug, "foo-bar");
+      assert.equal(conflict.existingName, "Foo Bar");
+      assert.equal(conflict.requestedName, "Foo-Bar");
+      return true;
+    }
+  );
+});
+
+test("saveDashboardFile allows same slug when replace is true", async () => {
+  const vaultPath = await createTempVault();
+  process.env.VAULT_PATH = vaultPath;
+
+  await saveDashboardFile({ ...minimalPayload, name: "Foo Bar" });
+
+  const saved = await saveDashboardFile(
+    { ...minimalPayload, name: "Foo-Bar" },
+    { replace: true }
+  );
+
+  assert.equal(saved.slug, "foo-bar");
+  assert.equal(saved.name, "Foo-Bar");
+
+  const loaded = await getDashboardFile("foo-bar");
+  assert.equal(loaded?.name, "Foo-Bar");
+});
+
+test("saveDashboardFile allows idempotent save for same display name and slug", async () => {
+  const vaultPath = await createTempVault();
+  process.env.VAULT_PATH = vaultPath;
+
+  await saveDashboardFile({ ...minimalPayload, name: "Foo Bar" });
+  const again = await saveDashboardFile({ ...minimalPayload, name: "Foo Bar" });
+
+  assert.equal(again.slug, "foo-bar");
+  assert.equal(again.name, "Foo Bar");
+
+  const listed = await listDashboardFiles();
+  assert.equal(listed.length, 1);
 });

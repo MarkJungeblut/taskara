@@ -36,10 +36,13 @@ export async function PUT(
     return new NextResponse("Dashboard name is required.", { status: 400 });
   }
 
-  const saved = await store.saveDashboard({
-    ...payload,
-    slug
-  });
+  const saved = await store.saveDashboard(
+    {
+      ...payload,
+      slug
+    },
+    { replace: true }
+  );
   return NextResponse.json(saved);
 }
 

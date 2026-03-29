@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { DashboardSlugConflictError } from "@/lib/dashboard-files";
 import { getVaultStore } from "@/lib/vault-store";
 import type { DashboardPayload } from "@/lib/types";
 
@@ -22,6 +23,13 @@ export async function POST(request: Request) {
     return new NextResponse("Dashboard name is required.", { status: 400 });
   }
 
-  const saved = await store.saveDashboard(payload);
-  return NextResponse.json(saved);
+  try {
+    const saved = await store.saveDashboard(payload);
+    return NextResponse.json(saved);
+  } catch (error) {
+    if (error instanceof DashboardSlugConflictError) {
+      return new NextResponse(error.message, { status: 409 });
+    }
+    throw error;
+  }
 }

@@ -130,8 +130,11 @@ class VaultStore {
     return buildPreview(this.notes, request, buildObsidianUrl, this.fields);
   }
 
-  async saveDashboard(payload: DashboardPayload): Promise<DashboardFile> {
-    const dashboard = await saveDashboardFile(payload);
+  async saveDashboard(
+    payload: DashboardPayload,
+    options?: { replace?: boolean }
+  ): Promise<DashboardFile> {
+    const dashboard = await saveDashboardFile(payload, options);
     this.dashboards = await listDashboardFiles();
     this.revision += 1;
     return dashboard;
