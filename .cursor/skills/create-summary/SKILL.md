@@ -1,6 +1,6 @@
 ---
 name: create-summary
-description: Create a new committed task summary in docs/task-summaries for a completed non-trivial task in this repository. Use when the user asks to create a summary, finish a task with a handoff note, or capture what was done in the current thread.
+description: Create a new task summary file in docs/task-summaries for a completed non-trivial task in this repository. Use when the user asks to create a summary, finish a task with a handoff note, or capture what was done in the current thread.
 ---
 
 # Create Summary
@@ -26,7 +26,6 @@ Use this skill to create a new task summary file for a completed non-trivial tas
    - `## Files Touched`
    - `## Decisions`
    - `## Follow-Ups`
-7. Stage and commit the new summary file with a concise commit message unless the user explicitly asks you not to commit.
 
 ## Writing Rules
 
@@ -42,6 +41,5 @@ Use this skill to create a new task summary file for a completed non-trivial tas
 
 ## Repository Conventions
 
-- Summaries in this repository are committed docs, not private notes.
-- Store all task summaries in `docs/task-summaries/`.
+- Store all task summaries in `docs/task-summaries/` (in-repo, not ad-hoc scratch paths).
 - Use `docs/task-summaries/2026-03-27-baseline-repo-setup.md` as a concrete example of the expected style and level of detail.

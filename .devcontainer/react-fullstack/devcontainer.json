@@ -6,13 +6,12 @@
       "version": "22"
     }
   },
-  "postCreateCommand": "/bin/bash .devcontainer/scripts/post-create.sh",
   "forwardPorts": [
     1455
   ],
   "portsAttributes": {
     "1455": {
-      "label": "Codex auth callback"
+      "label": "OAuth / AI auth callback"
     }
   },
   "customizations": {

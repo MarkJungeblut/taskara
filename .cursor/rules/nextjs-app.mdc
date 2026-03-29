@@ -1,0 +1,17 @@
+---
+description: Next.js App Router boundaries, data fetching, and hydration for Taskara
+globs: "app/**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Next.js (App Router) — Taskara
+
+- Respect **server vs client** boundaries: RSC payloads and props must be serializable; no passing functions or non-JSON-safe values across the boundary.
+- Map the **execution boundary** (route, layout, server action, or API route) before changing data flow; prefer the smallest change that preserves behavior outside the touched path.
+- **Data fetching and cache**: be explicit about SSR/RSC cache and revalidation; after mutations, use the right invalidation (`revalidatePath`, `revalidateTag`, etc.) so the UI does not show stale vault or dashboard state.
+- **Server actions and route handlers**: validate inputs, avoid leaking secrets or env-only values to the client, and keep HTTP contracts stable for callers.
+- **Hydration and UX**: ensure client components that depend on browser-only APIs or layout do not mismatch server HTML; use loading and error UI (`error.tsx`, `loading.tsx`, suspense) where routes need it.
+- **Navigation**: verify behavior on **full page load** and **client navigation** for routes you touch.
+- Call out **runtime** assumptions (Node vs Edge) when code uses platform-specific APIs.
+
+Do not redesign app-wide routing or architecture for a localized fix unless the task explicitly asks for it.

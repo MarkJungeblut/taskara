@@ -1,0 +1,22 @@
+---
+description: Taskara product context, vault paths, and repo conventions
+alwaysApply: true
+---
+
+# Taskara core
+
+Taskara is a local-first Next.js app for Markdown vaults with YAML frontmatter: scan one vault, discover frontmatter fields, filter notes in the UI, and save dashboards as YAML inside the vault.
+
+## Vault and data
+
+- Local dev default vault: `./example-vault`. Override with `VAULT_PATH=/absolute/path/to/vault` (see `README.md`).
+- Docker Compose: set `TASKARA_VAULT_PATH` before `docker compose up`; the container mounts the vault at `/vault`.
+- Treat vault note files as **read-only** in application code. **Only** write dashboard artifacts under `.taskara/dashboards/` (inside the vault).
+
+## Where to look
+
+- Commands and scripts: `README.md`.
+- Persisted task handoffs: `docs/task-summaries/`.
+- Agent skills (e.g. create/check task summaries): `.cursor/skills/` — follow the `SKILL.md` in each skill folder for handoffs.
+
+When changing indexing or dashboard behavior, keep the read-only vs dashboards-only split explicit in code and APIs.

@@ -1,0 +1,13 @@
+# Cursor indexing — mirror heavy generated dirs from .gitignore.
+# example-vault/ is intentionally NOT listed so assistants can sample notes.
+
+node_modules/
+.next/
+dist/
+build/
+coverage/
+.turbo/
+.cache/
+*.log
+*.tsbuildinfo
+

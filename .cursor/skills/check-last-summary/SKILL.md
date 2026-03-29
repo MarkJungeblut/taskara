@@ -1,6 +1,6 @@
 ---
 name: check-last-summary
-description: Read the most recent persisted task summary in docs/task-summaries for this repository and turn it into a concise session-resume recap. Use when the user asks to continue from the last session, wants the latest committed summary for context, or explicitly invokes $check-last-summary before starting more work.
+description: Read the most recent persisted task summary in docs/task-summaries for this repository and turn it into a concise session-resume recap. Use when the user asks to continue from the last session, wants the latest committed summary for context, or explicitly invokes check-last-summary before starting more work.
 ---
 
 # Check Last Summary
@@ -34,4 +34,4 @@ Use this skill to recover the latest committed handoff context from this reposit
 
 - Task summaries in this repository are committed Markdown files under `docs/task-summaries/`.
 - The shared summary template lives at `docs/task-summaries/_template.md`.
-- Use `docs/task-summaries/2026-03-26-task-summary-convention.md` as a concrete style example if you need to understand the structure of persisted summaries.
+- Use `docs/task-summaries/2026-03-28-local-frontmatter-dashboard-v1.md` as a concrete style example if you need to understand the structure of persisted summaries.

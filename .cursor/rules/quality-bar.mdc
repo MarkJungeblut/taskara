@@ -1,0 +1,16 @@
+---
+description: Evidence-first review habits for TypeScript and TSX changes
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Review quality bar
+
+- Separate **confirmed behavior** from **hypotheses**; cite concrete file/lines and user-visible impact when flagging issues.
+- Prefer **minimal** fixes or recommendations that reduce risk (correctness, security, stale data) over broad style or rewrite suggestions.
+- Check **error paths and invariants** in changed control flow; note hidden coupling or side effects.
+- For API or data contracts, confirm **callers and serialization** remain coherent.
+- Mention **what was validated** (tests, manual path) vs **what still needs** runtime or environment checks.
+- End with **residual risk** and scoped follow-ups when something cannot be proven from the diff alone.
+
+Avoid turning review into a full redesign unless explicitly requested.

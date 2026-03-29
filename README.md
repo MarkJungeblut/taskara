@@ -101,3 +101,8 @@ sort:
 - a saved dashboard under `.taskara/dashboards/`
 
 It is meant to make the app runnable immediately after setup.
+
+## AI assistants
+
+- **Cursor** project rules live under `.cursor/rules/` (`.mdc` files).
+- **Shared** workflows: task summaries in `docs/task-summaries/` and Cursor skills in `.cursor/skills/` (e.g. `create-summary`, `check-last-summary`).
