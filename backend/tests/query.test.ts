@@ -1,9 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildPreview } from "../backend/services/buildPreview";
-import type { FieldMetadata } from "../backend/domain/models/FieldMetadata";
-import type { NoteRecord } from "../backend/domain/models/NoteRecord";
+import { buildPreview } from "../src/services/buildPreview";
+import type { FieldMetadata } from "../src/domain/models/FieldMetadata";
+import type { NoteRecord } from "../src/domain/models/NoteRecord";
 
 const fields: FieldMetadata[] = [
   {

@@ -7,7 +7,7 @@
     "build": "next build",
     "postbuild": "cp -r .next/static .next/standalone/.next/static",
     "start": "node .next/standalone/server.js",
-    "test": "tsx --test tests/**/*.test.ts",
+    "test": "tsx --test backend/tests/**/*.test.ts",
     "lint": "eslint ."
   },
   "dependencies": {

@@ -4,9 +4,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import type { DashboardPayload } from "../backend/dto/DashboardPayload";
-import { FileSystemDashboardRepository } from "../backend/repositories/FileSystemDashboardRepository";
-import { DashboardSlugConflictError } from "../backend/errors/DashboardSlugConflictError";
+import type { DashboardPayload } from "../src/dto/DashboardPayload";
+import { FileSystemDashboardRepository } from "../src/repositories/FileSystemDashboardRepository";
+import { DashboardSlugConflictError } from "../src/errors/DashboardSlugConflictError";
 
 async function createTempVault(): Promise<string> {
   return fs.mkdtemp(path.join(os.tmpdir(), "taskara-vault-"));

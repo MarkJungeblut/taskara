@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { FileSystemVaultScanner } from "../backend/infrastructure/vault/FileSystemVaultScanner";
+import { FileSystemVaultScanner } from "../src/infrastructure/vault/FileSystemVaultScanner";
 
 async function createTempVault(): Promise<string> {
   return fs.mkdtemp(path.join(os.tmpdir(), "taskara-scan-"));
