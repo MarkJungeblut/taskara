@@ -24,11 +24,14 @@ export function useQueryPreview(draft: DashboardPayload): QueryPreviewState {
       setPreviewError(null);
 
       try {
+        const chartGroupByFields = (draft.charts ?? []).map((chart) => chart.groupBy);
+        const effectiveColumns = ensureColumns([...draft.columns, ...chartGroupByFields]);
+
         const nextPreview = await fetchJson<QueryPreviewResponse>("/api/query/preview", {
           method: "POST",
           body: JSON.stringify({
             filters: draft.filters,
-            columns: ensureColumns(draft.columns),
+            columns: effectiveColumns,
             sort: draft.sort
           })
         });

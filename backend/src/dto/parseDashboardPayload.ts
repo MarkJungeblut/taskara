@@ -1,4 +1,5 @@
 import type { DashboardPayload } from "@backend/dto/DashboardPayload";
+import { normalizeDashboardCharts } from "@backend/domain/services/normalizeDashboardCharts";
 
 export function parseDashboardPayload(value: unknown): DashboardPayload | null {
   if (!value || typeof value !== "object") {
@@ -11,6 +12,8 @@ export function parseDashboardPayload(value: unknown): DashboardPayload | null {
     return null;
   }
 
+  const charts = normalizeDashboardCharts(candidate.charts);
+
   return {
     version: 1,
     slug: typeof candidate.slug === "string" ? candidate.slug : undefined,
@@ -22,6 +25,7 @@ export function parseDashboardPayload(value: unknown): DashboardPayload | null {
     sort:
       candidate.sort && typeof candidate.sort === "object"
         ? (candidate.sort as DashboardPayload["sort"])
-        : undefined
+        : undefined,
+    ...(charts ? { charts } : {})
   };
 }

@@ -35,6 +35,35 @@ test("dashboard files can be saved and listed", async () => {
   assert.equal(loaded?.filters[0]?.field, "project");
 });
 
+test("dashboard YAML round-trip preserves charts", async () => {
+  const vaultPath = await createTempVault();
+  process.env.VAULT_PATH = vaultPath;
+  const repo = new FileSystemDashboardRepository();
+
+  const charts = [
+    { title: "By type", groupBy: "type", chartType: "bar" as const },
+    { groupBy: "tags", chartType: "pie" as const }
+  ];
+
+  await repo.save({
+    version: 1,
+    name: "Charted",
+    filters: [],
+    columns: ["title", "path", "type"],
+    charts
+  });
+
+  const loaded = await repo.get("charted");
+  assert.ok(loaded);
+  assert.equal(loaded?.charts?.length, 2);
+  assert.equal(loaded?.charts?.[0]?.title, "By type");
+  assert.equal(loaded?.charts?.[0]?.groupBy, "type");
+  assert.equal(loaded?.charts?.[0]?.chartType, "bar");
+  assert.equal(loaded?.charts?.[1]?.groupBy, "tags");
+  assert.equal(loaded?.charts?.[1]?.chartType, "pie");
+  assert.equal(loaded?.charts?.[1]?.title, undefined);
+});
+
 const minimalPayload: DashboardPayload = {
   version: 1 as const,
   name: "",

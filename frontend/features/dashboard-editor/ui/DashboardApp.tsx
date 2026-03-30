@@ -2,8 +2,21 @@
 
 import { useState } from "react";
 
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis
+} from "recharts";
+
 import type { DashboardPayload } from "@backend/dto/DashboardPayload";
-import type { DashboardFilter, FilterOperator } from "@backend/domain/models";
+import type { DashboardChart, DashboardChartType, DashboardFilter, FilterOperator } from "@backend/domain/models";
+import { buildChartBuckets } from "@backend/domain/services/buildChartBuckets";
 import { useDashboardFileActions } from "@frontend/features/dashboard-files/controller/useDashboardFileActions";
 import {
   createEmptyDashboard,
@@ -18,6 +31,8 @@ import { useQueryPreview } from "@frontend/features/query-preview/controller/use
 import { useWorkspace } from "@frontend/features/workspace/controller/useWorkspace";
 import { OPERATOR_LABELS } from "@frontend/shared/domain/OperatorLabels";
 import { formatTimestamp, formatValue } from "@frontend/shared/utils/format";
+
+const PIE_COLORS = ["#0071e3", "#34c759", "#ff9500", "#af52de", "#5856d6", "#ff375f", "#5ac8fa"];
 
 export function DashboardApp() {
   const { status, fields, dashboards, loading, error: workspaceError, setDashboards, rescanVault } = useWorkspace();
@@ -90,6 +105,33 @@ export function DashboardApp() {
     setDraft((current) => ({
       ...current,
       filters: current.filters.filter((_, filterIndex) => filterIndex !== index)
+    }));
+  }
+
+  function addChart(): void {
+    const fallbackField = fields[0]?.field ?? "";
+    setDraft((current) => ({
+      ...current,
+      charts: [...(current.charts ?? []), { groupBy: fallbackField, chartType: "bar" }]
+    }));
+  }
+
+  function updateChart(index: number, partial: Partial<DashboardChart>): void {
+    setDraft((current) => {
+      const list = [...(current.charts ?? [])];
+      const previous = list[index];
+      if (!previous) {
+        return current;
+      }
+      list[index] = { ...previous, ...partial };
+      return { ...current, charts: list };
+    });
+  }
+
+  function removeChart(index: number): void {
+    setDraft((current) => ({
+      ...current,
+      charts: (current.charts ?? []).filter((_, chartIndex) => chartIndex !== index)
     }));
   }
 
@@ -198,8 +240,10 @@ export function DashboardApp() {
                 <h2>Vault status</h2>
                 <span className="badge">{status?.isScanning ? "Scanning..." : "Watching"}</span>
               </div>
-              <div className="subtle">{status?.vaultPath ?? "Loading vault path..."}</div>
-              <div className="subtle">Dashboards: {status?.dashboardsPath ?? "Loading..."}</div>
+              <div className="subtle path-text">{status?.vaultPath ?? "Loading vault path..."}</div>
+              <div className="subtle path-text">
+                Dashboards: {status?.dashboardsPath ?? "Loading..."}
+              </div>
               <div className="button-row">
                 <button className="button" type="button" onClick={() => setDraft(createEmptyDashboard())}>
                   New dashboard
@@ -256,7 +300,7 @@ export function DashboardApp() {
                 <div className="warning-list">
                   {warningPreview.map((warning, index) => (
                     <div className="warning" key={`${warning.path}-${warning.field ?? index}`}>
-                      <strong>{warning.path}</strong>
+                      <strong className="path-text">{warning.path}</strong>
                       <div className="subtle">{warning.message}</div>
                     </div>
                   ))}
@@ -460,12 +504,152 @@ export function DashboardApp() {
 
             <div className="stack">
               <div className="section-title">
+                <h3>Charts</h3>
+                <button className="button" type="button" onClick={addChart}>
+                  Add chart
+                </button>
+              </div>
+              {(draft.charts ?? []).length === 0 ? (
+                <div className="empty">No charts yet. Add one to summarize matching notes by a field.</div>
+              ) : (
+                (draft.charts ?? []).map((chart, chartIndex) => (
+                  <div key={`${chart.groupBy}-${chartIndex}`} className="field-row chart-editor-row">
+                    <div className="field">
+                      <label>Title (optional)</label>
+                      <input
+                        className="input"
+                        type="text"
+                        placeholder={`By ${chart.groupBy}`}
+                        value={chart.title ?? ""}
+                        onChange={(event) =>
+                          updateChart(chartIndex, {
+                            title: event.target.value === "" ? undefined : event.target.value
+                          })
+                        }
+                      />
+                    </div>
+                    <div className="field">
+                      <label>Group by</label>
+                      <select
+                        className="select"
+                        value={chart.groupBy}
+                        onChange={(event) => updateChart(chartIndex, { groupBy: event.target.value })}
+                      >
+                        <option value="">Choose a field</option>
+                        {fields.map((field) => (
+                          <option key={field.field} value={field.field}>
+                            {field.field} ({field.type})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="field">
+                      <label>Chart type</label>
+                      <select
+                        className="select"
+                        value={chart.chartType}
+                        onChange={(event) =>
+                          updateChart(chartIndex, {
+                            chartType: event.target.value as DashboardChartType
+                          })
+                        }
+                      >
+                        <option value="bar">Bar</option>
+                        <option value="pie">Pie</option>
+                      </select>
+                    </div>
+                    <button className="button danger" type="button" onClick={() => removeChart(chartIndex)}>
+                      Remove
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="stack">
+              <div className="section-title">
                 <h3>Preview</h3>
                 <span className="badge">
                   {previewLoading ? "Refreshing..." : `${preview.total} matching notes`}
                 </span>
               </div>
               {previewError ? <div className="error">{previewError}</div> : null}
+              {(draft.charts ?? []).length > 0 && preview.rows.length > 0 ? (
+                <div className="charts-grid">
+                  {(draft.charts ?? []).map((chart, chartIndex) => {
+                    const data = buildChartBuckets(preview.rows, chart.groupBy);
+                    const heading = chart.title?.trim() || `By ${chart.groupBy || "field"}`;
+                    return (
+                      <div key={`chart-${chart.groupBy}-${chartIndex}`} className="chart-block">
+                        <div className="section-title">
+                          <h4>{heading}</h4>
+                          <span className="badge">{chart.chartType}</span>
+                        </div>
+                        {data.length === 0 ? (
+                          <div className="empty subtle">No values for this field.</div>
+                        ) : chart.chartType === "bar" ? (
+                          <ResponsiveContainer width="100%" height={220}>
+                            <BarChart
+                              data={data}
+                              margin={{ top: 8, right: 12, left: 4, bottom: 56 }}
+                            >
+                              <XAxis
+                                dataKey="label"
+                                tick={{ fill: "var(--muted)", fontSize: 11 }}
+                                interval={0}
+                                angle={-32}
+                                textAnchor="end"
+                                height={72}
+                              />
+                              <YAxis
+                                tick={{ fill: "var(--muted)", fontSize: 11 }}
+                                width={40}
+                                allowDecimals={false}
+                              />
+                              <Tooltip
+                                contentStyle={{
+                                  borderRadius: 8,
+                                  border: "1px solid var(--line)",
+                                  fontSize: 13
+                                }}
+                              />
+                              <Bar dataKey="count" fill="var(--accent)" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        ) : (
+                          <ResponsiveContainer width="100%" height={260}>
+                            <PieChart>
+                              <Pie
+                                data={data}
+                                dataKey="count"
+                                nameKey="label"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={88}
+                                label
+                              >
+                                {data.map((_, sliceIndex) => (
+                                  <Cell
+                                    key={`cell-${chartIndex}-${sliceIndex}`}
+                                    fill={PIE_COLORS[sliceIndex % PIE_COLORS.length]}
+                                  />
+                                ))}
+                              </Pie>
+                              <Tooltip
+                                contentStyle={{
+                                  borderRadius: 8,
+                                  border: "1px solid var(--line)",
+                                  fontSize: 13
+                                }}
+                              />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : null}
               <div className="table-wrap">
                 {loading ? (
                   <div className="empty">Loading workspace...</div>

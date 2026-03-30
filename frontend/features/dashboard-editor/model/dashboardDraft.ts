@@ -7,7 +7,8 @@ export function createEmptyDashboard(): DashboardPayload {
     version: 1,
     name: "Untitled Dashboard",
     filters: [],
-    columns: [...REQUIRED_COLUMNS]
+    columns: [...REQUIRED_COLUMNS],
+    charts: []
   };
 }
 

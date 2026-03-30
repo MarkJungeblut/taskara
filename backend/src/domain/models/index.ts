@@ -1,3 +1,4 @@
+export type { DashboardChart, DashboardChartType } from "@backend/domain/models/DashboardChart";
 export type { DashboardDefinition } from "@backend/domain/models/DashboardDefinition";
 export type { DashboardFile } from "@backend/domain/models/DashboardFile";
 export type { DashboardFilter } from "@backend/domain/models/DashboardFilter";

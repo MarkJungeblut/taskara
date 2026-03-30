@@ -5,6 +5,7 @@ import { parse as parseYaml, stringify as stringifyYaml } from "yaml";
 import type { DashboardPayload } from "@backend/dto/DashboardPayload";
 import type { DashboardRepository } from "@backend/repositories/DashboardRepository";
 import type { DashboardDefinition, DashboardFile, DashboardFilter, DashboardSort } from "@backend/domain/models";
+import { normalizeDashboardCharts } from "@backend/domain/services/normalizeDashboardCharts";
 import { getDashboardDirectoryPath } from "@backend/infrastructure/vault/models/VaultConfig";
 import { DashboardSlugConflictError } from "@backend/errors/DashboardSlugConflictError";
 
@@ -93,12 +94,15 @@ function normalizeDashboardData(data: unknown): DashboardDefinition | null {
     return null;
   }
 
+  const charts = normalizeDashboardCharts(candidate.charts);
+
   return {
     version: 1,
     name: candidate.name.trim(),
     filters: normalizeFilters(candidate.filters),
     columns: normalizeColumns(candidate.columns),
-    sort: normalizeSort(candidate.sort)
+    sort: normalizeSort(candidate.sort),
+    ...(charts ? { charts } : {})
   };
 }
 
@@ -179,12 +183,15 @@ export class FileSystemDashboardRepository implements DashboardRepository {
 
     const filePath = path.join(directoryPath, `${slug}.yaml`);
 
+    const charts = normalizeDashboardCharts(payload.charts);
+
     const normalized: DashboardDefinition = {
       version: 1,
       name: payload.name.trim(),
       filters: normalizeFilters(payload.filters),
       columns: normalizeColumns(payload.columns),
-      sort: normalizeSort(payload.sort)
+      sort: normalizeSort(payload.sort),
+      ...(charts ? { charts } : {})
     };
 
     await fs.writeFile(
@@ -194,7 +201,8 @@ export class FileSystemDashboardRepository implements DashboardRepository {
         name: normalized.name,
         filters: normalized.filters,
         columns: normalized.columns,
-        ...(normalized.sort ? { sort: normalized.sort } : {})
+        ...(normalized.sort ? { sort: normalized.sort } : {}),
+        ...(normalized.charts?.length ? { charts: normalized.charts } : {})
       }),
       "utf8"
     );
