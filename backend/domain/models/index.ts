@@ -1,0 +1,14 @@
+export type { DashboardDefinition } from "@backend/domain/models/DashboardDefinition";
+export type { DashboardFile } from "@backend/domain/models/DashboardFile";
+export type { DashboardFilter } from "@backend/domain/models/DashboardFilter";
+export type { DashboardSort } from "@backend/domain/models/DashboardSort";
+export type { FieldMetadata } from "@backend/domain/models/FieldMetadata";
+export type { FieldType } from "@backend/domain/models/FieldType";
+export type { FilterOperator } from "@backend/domain/models/FilterOperator";
+export type { FilterValue } from "@backend/domain/models/FilterValue";
+export type { NormalizedFieldValue } from "@backend/domain/models/NormalizedFieldValue";
+export type { NoteRecord } from "@backend/domain/models/NoteRecord";
+export type { ScanWarning } from "@backend/domain/models/ScanWarning";
+export type { SupportedFieldType } from "@backend/domain/models/SupportedFieldType";
+export type { VaultSnapshot } from "@backend/domain/models/VaultSnapshot";
+export type { VaultStatus } from "@backend/domain/models/VaultStatus";

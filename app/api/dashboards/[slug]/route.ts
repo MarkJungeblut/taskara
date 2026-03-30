@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { getVaultStore } from "@/lib/vault-store";
-import type { DashboardPayload } from "@/lib/types";
+import { parseDashboardPayload } from "@backend/dto/parseDashboardPayload";
+import { getVaultWorkspaceService } from "@backend/infrastructure/vault/RuntimeVaultWorkspace";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -11,10 +11,10 @@ export async function GET(
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
-  const store = getVaultStore();
-  await store.ready();
+  const service = getVaultWorkspaceService();
+  await service.ready();
 
-  const dashboard = await store.getDashboard(slug);
+  const dashboard = await service.getDashboard(slug);
 
   if (!dashboard) {
     return new NextResponse("Dashboard not found.", { status: 404 });
@@ -28,15 +28,15 @@ export async function PUT(
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
-  const store = getVaultStore();
-  await store.ready();
-  const payload = (await request.json()) as DashboardPayload;
+  const service = getVaultWorkspaceService();
+  await service.ready();
+  const payload = parseDashboardPayload(await request.json());
 
-  if (typeof payload.name !== "string" || payload.name.trim().length === 0) {
+  if (!payload) {
     return new NextResponse("Dashboard name is required.", { status: 400 });
   }
 
-  const saved = await store.saveDashboard(
+  const saved = await service.saveDashboard(
     {
       ...payload,
       slug
@@ -51,9 +51,9 @@ export async function DELETE(
   context: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await context.params;
-  const store = getVaultStore();
-  await store.ready();
-  const deleted = await store.deleteDashboard(slug);
+  const service = getVaultWorkspaceService();
+  await service.ready();
+  const deleted = await service.deleteDashboard(slug);
 
   if (!deleted) {
     return new NextResponse("Dashboard not found.", { status: 404 });

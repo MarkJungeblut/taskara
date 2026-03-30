@@ -1,30 +1,28 @@
 import { NextResponse } from "next/server";
 
-import { DashboardSlugConflictError } from "@/lib/dashboard-files";
-import { getVaultStore } from "@/lib/vault-store";
-import type { DashboardPayload } from "@/lib/types";
+import { parseDashboardPayload } from "@backend/dto/parseDashboardPayload";
+import { DashboardSlugConflictError } from "@backend/errors/DashboardSlugConflictError";
+import { getVaultWorkspaceService } from "@backend/infrastructure/vault/RuntimeVaultWorkspace";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET() {
-  const store = getVaultStore();
-  await store.ready();
-  return NextResponse.json(store.getDashboards());
+  const service = getVaultWorkspaceService();
+  await service.ready();
+  return NextResponse.json(service.getDashboards());
 }
 
 export async function POST(request: Request) {
-  const store = getVaultStore();
-  await store.ready();
-
-  const payload = (await request.json()) as DashboardPayload;
-
-  if (typeof payload.name !== "string" || payload.name.trim().length === 0) {
+  const service = getVaultWorkspaceService();
+  await service.ready();
+  const payload = parseDashboardPayload(await request.json());
+  if (!payload) {
     return new NextResponse("Dashboard name is required.", { status: 400 });
   }
 
   try {
-    const saved = await store.saveDashboard(payload);
+    const saved = await service.saveDashboard(payload);
     return NextResponse.json(saved);
   } catch (error) {
     if (error instanceof DashboardSlugConflictError) {

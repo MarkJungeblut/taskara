@@ -4,12 +4,9 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import {
-  DashboardSlugConflictError,
-  getDashboardFile,
-  listDashboardFiles,
-  saveDashboardFile
-} from "../src/lib/dashboard-files";
+import type { DashboardPayload } from "../backend/dto/DashboardPayload";
+import { FileSystemDashboardRepository } from "../backend/repositories/FileSystemDashboardRepository";
+import { DashboardSlugConflictError } from "../backend/errors/DashboardSlugConflictError";
 
 async function createTempVault(): Promise<string> {
   return fs.mkdtemp(path.join(os.tmpdir(), "taskara-vault-"));
@@ -18,8 +15,9 @@ async function createTempVault(): Promise<string> {
 test("dashboard files can be saved and listed", async () => {
   const vaultPath = await createTempVault();
   process.env.VAULT_PATH = vaultPath;
+  const repo = new FileSystemDashboardRepository();
 
-  const saved = await saveDashboardFile({
+  const saved = await repo.save({
     version: 1,
     name: "Foo Meeting Minutes",
     filters: [{ field: "project", operator: "equals", value: "foo" }],
@@ -29,29 +27,30 @@ test("dashboard files can be saved and listed", async () => {
 
   assert.equal(saved.slug, "foo-meeting-minutes");
 
-  const listed = await listDashboardFiles();
+  const listed = await repo.list();
   assert.equal(listed.length, 1);
   assert.equal(listed[0]?.name, "Foo Meeting Minutes");
 
-  const loaded = await getDashboardFile("foo-meeting-minutes");
+  const loaded = await repo.get("foo-meeting-minutes");
   assert.equal(loaded?.filters[0]?.field, "project");
 });
 
-const minimalPayload = {
+const minimalPayload: DashboardPayload = {
   version: 1 as const,
   name: "",
-  filters: [] as const,
-  columns: ["title", "path"] as const
+  filters: [],
+  columns: ["title", "path"]
 };
 
 test("saveDashboardFile rejects slug collision when names differ and replace is false", async () => {
   const vaultPath = await createTempVault();
   process.env.VAULT_PATH = vaultPath;
+  const repo = new FileSystemDashboardRepository();
 
-  await saveDashboardFile({ ...minimalPayload, name: "Foo Bar" });
+  await repo.save({ ...minimalPayload, name: "Foo Bar" });
 
   await assert.rejects(
-    saveDashboardFile({ ...minimalPayload, name: "Foo-Bar" }),
+    repo.save({ ...minimalPayload, name: "Foo-Bar" }),
     (error: unknown) => {
       assert.ok(error instanceof DashboardSlugConflictError);
       const conflict = error as DashboardSlugConflictError;
@@ -66,10 +65,11 @@ test("saveDashboardFile rejects slug collision when names differ and replace is 
 test("saveDashboardFile allows same slug when replace is true", async () => {
   const vaultPath = await createTempVault();
   process.env.VAULT_PATH = vaultPath;
+  const repo = new FileSystemDashboardRepository();
 
-  await saveDashboardFile({ ...minimalPayload, name: "Foo Bar" });
+  await repo.save({ ...minimalPayload, name: "Foo Bar" });
 
-  const saved = await saveDashboardFile(
+  const saved = await repo.save(
     { ...minimalPayload, name: "Foo-Bar" },
     { replace: true }
   );
@@ -77,20 +77,21 @@ test("saveDashboardFile allows same slug when replace is true", async () => {
   assert.equal(saved.slug, "foo-bar");
   assert.equal(saved.name, "Foo-Bar");
 
-  const loaded = await getDashboardFile("foo-bar");
+  const loaded = await repo.get("foo-bar");
   assert.equal(loaded?.name, "Foo-Bar");
 });
 
 test("saveDashboardFile allows idempotent save for same display name and slug", async () => {
   const vaultPath = await createTempVault();
   process.env.VAULT_PATH = vaultPath;
+  const repo = new FileSystemDashboardRepository();
 
-  await saveDashboardFile({ ...minimalPayload, name: "Foo Bar" });
-  const again = await saveDashboardFile({ ...minimalPayload, name: "Foo Bar" });
+  await repo.save({ ...minimalPayload, name: "Foo Bar" });
+  const again = await repo.save({ ...minimalPayload, name: "Foo Bar" });
 
   assert.equal(again.slug, "foo-bar");
   assert.equal(again.name, "Foo Bar");
 
-  const listed = await listDashboardFiles();
+  const listed = await repo.list();
   assert.equal(listed.length, 1);
 });

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { parseFrontmatterBlock } from "../src/lib/frontmatter";
+import { parseFrontmatterBlock } from "../backend/infrastructure/vault/FrontmatterParser";
 
 test("parseFrontmatterBlock normalizes supported values", () => {
   const source = `---

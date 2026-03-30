@@ -4,7 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
-import { scanVault } from "../src/lib/vault-scan";
+import { FileSystemVaultScanner } from "../backend/infrastructure/vault/FileSystemVaultScanner";
 
 async function createTempVault(): Promise<string> {
   return fs.mkdtemp(path.join(os.tmpdir(), "taskara-scan-"));
@@ -36,7 +36,7 @@ project: [
     "utf8"
   );
 
-  const snapshot = await scanVault(vaultPath);
+  const snapshot = await new FileSystemVaultScanner().scan(vaultPath);
 
   assert.equal(snapshot.notes.length, 2);
   assert.equal(snapshot.fields.some((field) => field.field === "project"), true);

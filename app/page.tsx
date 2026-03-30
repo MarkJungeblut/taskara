@@ -1,4 +1,4 @@
-import { DashboardApp } from "@/components/dashboard-app";
+import { DashboardApp } from "@frontend/features/dashboard-editor/ui/DashboardApp";
 
 export const dynamic = "force-dynamic";
 

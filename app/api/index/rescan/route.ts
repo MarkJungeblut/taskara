@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { getVaultStore } from "@/lib/vault-store";
+import { getVaultWorkspaceService } from "@backend/infrastructure/vault/RuntimeVaultWorkspace";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function POST() {
-  const store = getVaultStore();
-  await store.ready();
-  await store.refreshAll();
+  const service = getVaultWorkspaceService();
+  await service.ready();
+  await service.refreshAll();
   return NextResponse.json({ ok: true });
 }
